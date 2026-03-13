@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroSystem Pro - Receituário</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a531b;
+            --secondary: #2e7d32;
+            --accent: #8bc34a;
+            --text-dark: #1b262c;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* --- TELA INICIAL --- */
+        #telaInicial {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(26, 83, 27, 0.9), rgba(46, 125, 50, 0.8)), 
+                        url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+            color: var(--white);
+        }
+
+        .hero-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            padding: 50px 30px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .hero-card h1 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 800; letter-spacing: -1px; }
+
+        .btn-main {
+            background: var(--white);
+            color: var(--primary);
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* --- CONTAINER DO APP --- */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .app-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .section-header {
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+            margin: 25px 0 15px 0;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: #64748b; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background: #fcfcfc;
+        }
+
+        /* BARRA DE PRODUTO ORGANIZADA */
+        .produto-form-row {
+            display: flex;
+            gap: 10px;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 12px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .flex-grow { flex: 2; }
+        .flex-small { flex: 0.8; }
+        .flex-unit { flex: 0.6; }
+
+        .table-wrapper { overflow-x: auto; margin-top: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #f1f5f9; padding: 15px; font-size: 0.8rem; text-transform: uppercase; color: #475569; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+
+        .badge-tanque {
+            background: #eefbee;
+            color: var(--secondary);
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .summary-banner {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .summary-top {
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat h3 { margin: 0; font-size: 1.8rem; }
+        .stat p { margin: 0; font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; }
+
+        .summary-details { font-size: 0.9rem; text-align: center; }
+
+        .btn-group { display: flex; gap: 15px; margin-top: 30px; }
+        .btn-action {
+            flex: 1;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-pdf { background: #1e293b; color: white; }
+        .btn-whats { background: #22c55e; color: white; }
+
+        @media (max-width: 768px) {
+            .produto-form-row { flex-direction: column; align-items: stretch; }
+            .grid-3, .grid-2 { grid-template-columns: 1fr; }
+            .summary-top { flex-direction: column; gap: 20px; text-align: center; }
+            .btn-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="telaInicial">
+    <div class="hero-card">
+        <h1>AgroSystem Pro</h1>
+        <p>Tecnologia a serviço do homem campo.</p>
+        <button class="btn-main" onclick="abrirApp()">Começar Agora</button>
+        <div style="margin-top: 25px; font-size: 0.7rem; opacity: 0.6;">JOÃO DIVINO BARBOSA ®</div>
+    </div>
+</div>
+
+<div class="container" id="app">
+    <div class="app-card">
+        <h2 style="margin-top:0; color: var(--primary)">Painel de Controle</h2>
+
+        <div class="section-header">Identificação</div>
+        <div class="grid-2">
+            <div>
+                <label>Engenheiro Agrônomo</label>
+                <input id="agronomo" placeholder="Nome Completo">
+            </div>
+            <div>
+                <label>Fazenda</label>
+                <input id="fazenda" placeholder="Propriedade">
+            </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 15px;">
+            <div>
+                <label>Cultura</label>
+                <input id="cultura" placeholder="Ex: Soja">
+            </div>
+            <div>
+                <label>Área (ha)</label>
+                <input id="area" type="number" oninput="atualizar()">
+            </div>
+            <div>
+                <label>Calda (L/ha)</label>
+                <input id="calda" type="number" oninput="atualizar()">
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 15px;">
+            <div>
+                <label>Tanque (L)</label>
+                <input id="tanque" type="number" oninput="atualizar()">
+            </div>
+            <div>
+                <label>Data</label>
+                <input type="date" id="data">
+            </div>
+        </div>
+
+        <div class="section-header">Produtos e Dosagens</div>
+        
+        <div class="produto-form-row">
+            <div class="flex-grow">
+                <label>Nome do Produto</label>
+                <input id="prodNome" placeholder="Ex: Herbicida X">
+            </div>
+            <div class="flex-small">
+                <label>Dose/ha</label>
+                <input id="prodDose" type="number" step="0.01" placeholder="0.00">
+            </div>
+            <div class="flex-unit">
+                <label>Unidade</label>
+                <select id="prodUnidade">
+                    <option value="L">L</option>
+                    <option value="Kg">Kg</option>
+                </select>
+            </div>
+            <button class="btn-main" style="background: var(--primary); color: white; height: 48px; padding: 0 25px;" onclick="addProduto()">Add</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Dose/ha</th>
+                        <th>Total Geral</th>
+                        <th>Dose/Tanque</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="lista"></tbody>
+            </table>
+        </div>
+
+        <div class="summary-banner" id="bannerVerde">
+            <div class="summary-top">
+                <div class="stat">
+                    <p>Calda Total</p>
+                    <h3 id="totCalda">0 L</h3>
+                </div>
+                <div class="stat">
+                    <p>Total de Tanques</p>
+                    <h3 id="totTanques">0</h3>
+                </div>
+            </div>
+            <div class="summary-details" id="detalhesTanque">
+                Adicione produtos para ver o resumo.
+            </div>
+        </div>
+
+        <label>Observações Técnicas</label>
+        <textarea id="obs" rows="3"></textarea>
+
+        <div class="btn-group">
+            <button class="btn-action btn-whats" onclick="enviarWhats()">Enviar WhatsApp</button>
+            <button class="btn-action btn-pdf" onclick="gerarPDF()">Gerar PDF</button>
+            <button class="btn-action" style="background:#cbd5e1;" onclick="window.location.reload()">Limpar</button>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; font-size: 0.75rem; color: #94a3b8;">
+            JOÃO DIVINO BARBOSA ®
+        </div>
+    </div>
+</div>
+
+<script>
+    let produtos = [];
+
+    function abrirApp() {
+        document.getElementById('telaInicial').style.display = 'none';
+        const app = document.getElementById('app');
+        app.style.display = 'block';
+        setTimeout(() => app.style.opacity = '1', 10);
+        document.getElementById('data').valueAsDate = new Date();
+    }
+
+    function addProduto() {
+        const nome = document.getElementById('prodNome').value;
+        const dose = parseFloat(document.getElementById('prodDose').value);
+        const unidade = document.getElementById('prodUnidade').value;
+        if(!nome || !dose) return alert("Preencha o nome e a dose!");
+        produtos.push({ nome, dose, unidade });
+        document.getElementById('prodNome').value = "";
+        document.getElementById('prodDose').value = "";
+        atualizar();
+    }
+
+    function remover(i) {
+        produtos.splice(i, 1);
+        atualizar();
+    }
+
+    function atualizar() {
+        const area = parseFloat(document.getElementById('area').value) || 0;
+        const tanque = parseFloat(document.getElementById('tanque').value) || 0;
+        const caldaHa = parseFloat(document.getElementById('calda').value) || 0;
+
+        const totalCalda = area * caldaHa;
+        const nTanques = tanque > 0 ? Math.ceil(totalCalda / tanque) : 0;
+
+        document.getElementById('totCalda').innerText = totalCalda.toLocaleString() + " L";
+        document.getElementById('totTanques').innerText = nTanques;
+
+        const corpo = document.getElementById('lista');
+        const detalhes = document.getElementById('detalhesTanque');
+        corpo.innerHTML = "";
+        detalhes.innerHTML = "<strong>MISTURA POR TANQUE:</strong><br>";
+
+        produtos.forEach((p, i) => {
+            const totalGeral = p.dose * area;
+            const doseTanque = caldaHa > 0 ? (p.dose * tanque / caldaHa) : 0;
+
+            corpo.innerHTML += `
+                <tr>
+                    <td><b>${p.nome}</b></td>
+                    <td>${p.dose.toFixed(2)} ${p.unidade}</td>
+                    <td>${totalGeral.toFixed(2)} ${p.unidade}</td>
+                    <td><span class="badge-tanque">${doseTanque.toFixed(2)} ${p.unidade}</span></td>
+                    <td><button onclick="remover(${i})" style="color:red; border:none; background:none; cursor:pointer;">Remover</button></td>
+                </tr>
+            `;
+            detalhes.innerHTML += `• ${p.nome}: <b>${doseTanque.toFixed(2)} ${p.unidade}</b><br>`;
+        });
+
+        return { area, tanque, caldaHa, totalCalda, nTanques };
+    }
+
+    function enviarWhats() {
+        const res = atualizar();
+        let msg = `*RECEITUÁRIO AGRONÔMICO PRO*\n\n`;
+        msg += `👨‍🔬 *Agrônomo:* ${document.getElementById('agronomo').value}\n`;
+        msg += `🏡 *Fazenda:* ${document.getElementById('fazenda').value}\n`;
+        msg += `📐 *Área:* ${res.area} ha | *Tanques:* ${res.nTanques}\n\n`;
+        msg += `*DETALHAMENTO DE PRODUTOS:*\n`;
+
+        produtos.forEach(p => {
+            const dt = res.caldaHa > 0 ? (p.dose * res.tanque / res.caldaHa) : 0;
+            const totalGeral = p.dose * res.area;
+            msg += `--------------------------\n`;
+            msg += `✅ *${p.nome}*\n`;
+            msg += `• Dose/ha: ${p.dose.toFixed(2)} ${p.unidade}\n`;
+            msg += `• Dose/Tanque: *${dt.toFixed(2)} ${p.unidade}*\n`;
+            msg += `• Total Área: *${totalGeral.toFixed(2)} ${p.unidade}*\n`;
+        });
+
+        const obs = document.getElementById('obs').value;
+        if(obs) msg += `\n📝 *OBS:* ${obs}`;
+
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+    }
+
+    function gerarPDF() {
+        const res = atualizar();
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(18); doc.setFont("helvetica", "bold");
+        doc.text("RECEITUÁRIO AGRONÔMICO", 105, 20, {align: "center"});
+        doc.setFontSize(10); doc.setFont("helvetica", "normal");
+        doc.text(`Profissional: ${document.getElementById('agronomo').value}`, 14, 35);
+        doc.text(`Fazenda: ${document.getElementById('fazenda').value} | Área: ${res.area} ha`, 14, 42);
+        doc.text(`Tanque: ${res.tanque} L | Calda: ${res.caldaHa} L/ha | N. Tanques: ${res.nTanques}`, 14, 49);
+
+        const rows = produtos.map(p => [
+            p.nome, `${p.dose.toFixed(2)} ${p.unidade}`, 
+            `${(p.dose * res.area).toFixed(2)} ${p.unidade}`, <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroSystem Pro - Receituário</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a531b;
+            --secondary: #2e7d32;
+            --accent: #8bc34a;
+            --text-dark: #1b262c;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* --- TELA INICIAL --- */
+        #telaInicial {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(26, 83, 27, 0.9), rgba(46, 125, 50, 0.8)), 
+                        url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+            color: var(--white);
+        }
+
+        .hero-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            padding: 50px 30px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .hero-card h1 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 800; letter-spacing: -1px; }
+
+        .btn-main {
+            background: var(--white);
+            color: var(--primary);
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* --- CONTAINER DO APP --- */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .app-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .section-header {
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+            margin: 25px 0 15px 0;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: #64748b; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background: #fcfcfc;
+        }
+
+        /* BARRA DE PRODUTO ORGANIZADA */
+        .produto-form-row {
+            display: flex;
+            gap: 10px;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 12px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .flex-grow { flex: 2; }
+        .flex-small { flex: 0.8; }
+        .flex-unit { flex: 0.6; }
+
+        .table-wrapper { overflow-x: auto; margin-top: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #f1f5f9; padding: 15px; font-size: 0.8rem; text-transform: uppercase; color: #475569; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+
+        .badge-tanque {
+            background: #eefbee;
+            color: var(--secondary);
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .summary-banner {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .summary-top {
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat h3 { margin: 0; font-size: 1.8rem; }
+        .stat p { margin: 0; font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; }
+
+        .summary-details { font-size: 0.9rem; text-align: center; }
+
+        .btn-group { display: flex; gap: 15px; margin-top: 30px; }
+        .btn-action {
+            flex: 1;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-pdf { background: #1e293b; color: white; }
+        .btn-whats { background: #22c55e; color: white; }
+
+        @media (max-width: 768px) {
+            .produto-form-row { flex-direction: column; align-items: stretch; }
+            .grid-3, .grid-2 { grid-template-columns: 1fr; }
+            .summary-top { flex-direction: column; gap: 20px; text-align: center; }
+            .btn-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="telaInicial">
+    <div class="hero-card">
+        <h1>AgroSystem Pro</h1>
+        <p>Tecnologia a serviço do homem campo.</p>
+        <button class="btn-main" onclick="abrirApp()">Começar Agora</button>
+        <div style="margin-top: 25px; font-size: 0.7rem; opacity: 0.6;">JOÃO DIVINO BARBOSA ®</div>
+    </div>
+</div>
+
+<div class="container" id="app">
+    <div class="app-card">
+        <h2 style="margin-top:0; color: var(--primary)">Painel de Controle</h2>
+
+        <div class="section-header">Identificação</div>
+        <div class="grid-2">
+            <div>
+                <label>Engenheiro Agrônomo</label>
+                <input id="agronomo" placeholder="Nome Completo">
+            </div>
+            <div>
+                <label>Fazenda</label>
+                <input id="fazenda" placeholder="Propriedade">
+            </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 15px;">
+            <div>
+                <label>Cultura</label>
+                <input id="cultura" placeholder="Ex: Soja">
+            </div>
+            <div>
+                <label>Área (ha)</label>
+                <input id="area" type="number" oninput="atualizar()">
+            </div>
+            <div>
+                <label>Calda (L/ha)</label>
+                <input id="calda" type="number" oninput="atualizar()">
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 15px;">
+            <div>
+                <label>Tanque (L)</label>
+                <input id="tanque" type="number" oninput="atualizar()">
+            </div>
+            <div>
+                <label>Data</label>
+                <input type="date" id="data">
+            </div>
+        </div>
+
+        <div class="section-header">Produtos e Dosagens</div>
+        
+        <div class="produto-form-row">
+            <div class="flex-grow">
+                <label>Nome do Produto</label>
+                <input id="prodNome" placeholder="Ex: Herbicida X">
+            </div>
+            <div class="flex-small">
+                <label>Dose/ha</label>
+                <input id="prodDose" type="number" step="0.01" placeholder="0.00">
+            </div>
+            <div class="flex-unit">
+                <label>Unidade</label>
+                <select id="prodUnidade">
+                    <option value="L">L</option>
+                    <option value="Kg">Kg</option>
+                </select>
+            </div>
+            <button class="btn-main" style="background: var(--primary); color: white; height: 48px; padding: 0 25px;" onclick="addProduto()">Add</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Dose/ha</th>
+                        <th>Total Geral</th>
+                        <th>Dose/Tanque</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="lista"></tbody>
+            </table>
+        </div>
+
+        <div class="summary-banner" id="bannerVerde">
+            <div class="summary-top">
+                <div class="stat">
+                    <p>Calda Total</p>
+                    <h3 id="totCalda">0 L</h3>
+                </div>
+                <div class="stat">
+                    <p>Total de Tanques</p>
+                    <h3 id="totTanques">0</h3>
+                </div>
+            </div>
+            <div class="summary-details" id="detalhesTanque">
+                Adicione produtos para ver o resumo.
+            </div>
+        </div>
+
+        <label>Observações Técnicas</label>
+        <textarea id="obs" rows="3"></textarea>
+
+        <div class="btn-group">
+            <button class="btn-action btn-whats" onclick="enviarWhats()">Enviar WhatsApp</button>
+            <button class="btn-action btn-pdf" onclick="gerarPDF()">Gerar PDF</button>
+            <button class="btn-action" style="background:#cbd5e1;" onclick="window.location.reload()">Limpar</button>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; font-size: 0.75rem; color: #94a3b8;">
+            JOÃO DIVINO BARBOSA ®
+        </div>
+    </div>
+</div>
+
+<script>
+    let produtos = [];
+
+    function abrirApp() {
+        document.getElementById('telaInicial').style.display = 'none';
+        const app = document.getElementById('app');
+        app.style.display = 'block';
+        setTimeout(() => app.style.opacity = '1', 10);
+        document.getElementById('data').valueAsDate = new Date();
+    }
+
+    function addProduto() {
+        const nome = document.getElementById('prodNome').value;
+        const dose = parseFloat(document.getElementById('prodDose').value);
+        const unidade = document.getElementById('prodUnidade').value;
+        if(!nome || !dose) return alert("Preencha o nome e a dose!");
+        produtos.push({ nome, dose, unidade });
+        document.getElementById('prodNome').value = "";
+        document.getElementById('prodDose').value = "";
+        atualizar();
+    }
+
+    function remover(i) {
+        produtos.splice(i, 1);
+        atualizar();
+    }
+
+    function atualizar() {
+        const area = parseFloat(document.getElementById('area').value) || 0;
+        const tanque = parseFloat(document.getElementById('tanque').value) || 0;
+        const caldaHa = parseFloat(document.getElementById('calda').value) || 0;
+
+        const totalCalda = area * caldaHa;
+        const nTanques = tanque > 0 ? Math.ceil(totalCalda / tanque) : 0;
+
+        document.getElementById('totCalda').innerText = totalCalda.toLocaleString() + " L";
+        document.getElementById('totTanques').innerText = nTanques;
+
+        const corpo = document.getElementById('lista');
+        const detalhes = document.getElementById('detalhesTanque');
+        corpo.innerHTML = "";
+        detalhes.innerHTML = "<strong>MISTURA POR TANQUE:</strong><br>";
+
+        produtos.forEach((p, i) => {
+            const totalGeral = p.dose * area;
+            const doseTanque = caldaHa > 0 ? (p.dose * tanque / caldaHa) : 0;
+
+            corpo.innerHTML += `
+                <tr>
+                    <td><b>${p.nome}</b></td>
+                    <td>${p.dose.toFixed(2)} ${p.unidade}</td>
+                    <td>${totalGeral.toFixed(2)} ${p.unidade}</td>
+                    <td><span class="badge-tanque">${doseTanque.toFixed(2)} ${p.unidade}</span></td>
+                    <td><button onclick="remover(${i})" style="color:red; border:none; background:none; cursor:pointer;">Remover</button></td>
+                </tr>
+            `;
+            detalhes.innerHTML += `• ${p.nome}: <b>${doseTanque.toFixed(2)} ${p.unidade}</b><br>`;
+        });
+
+        return { area, tanque, caldaHa, totalCalda, nTanques };
+    }
+
+    function enviarWhats() {
+        const res = atualizar();
+        let msg = `*RECEITUÁRIO AGRONÔMICO PRO*\n\n`;
+        msg += `👨‍🔬 *Agrônomo:* ${document.getElementById('agronomo').value}\n`;
+        msg += `🏡 *Fazenda:* ${document.getElementById('fazenda').value}\n`;
+        msg += `📐 *Área:* ${res.area} ha | *Tanques:* ${res.nTanques}\n\n`;
+        msg += `*DETALHAMENTO DE PRODUTOS:*\n`;
+
+        produtos.forEach(p => {
+            const dt = res.caldaHa > 0 ? (p.dose * res.tanque / res.caldaHa) : 0;
+            const totalGeral = p.dose * res.area;
+            msg += `--------------------------\n`;
+            msg += `✅ *${p.nome}*\n`;
+            msg += `• Dose/ha: ${p.dose.toFixed(2)} ${p.unidade}\n`;
+            msg += `• Dose/Tanque: *${dt.toFixed(2)} ${p.unidade}*\n`;
+            msg += `• Total Área: *${totalGeral.toFixed(2)} ${p.unidade}*\n`;
+        });
+
+        const obs = document.getElementById('obs').value;
+        if(obs) msg += `\n📝 *OBS:* ${obs}`;
+
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+    }
+
+    function gerarPDF() {
+        const res = atualizar();
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(18); doc.setFont("helvetica", "bold");
+        doc.text("RECEITUÁRIO AGRONÔMICO", 105, 20, {align: "center"});
+        doc.setFontSize(10); doc.setFont("helvetica", "normal");
+        doc.text(`Profissional: ${document.getElementById('agronomo').value}`, 14, 35);
+        doc.text(`Fazenda: ${document.getElementById('fazenda').value} | Área: ${res.area} ha`, 14, 42);
+        doc.text(`Tanque: ${res.tanque} L | Calda: ${res.caldaHa} L/ha | N. Tanques: ${res.nTanques}`, 14, 49);
+
+        const rows = produtos.map(p => [
+            p.nome, `${p.dose.toFixed(2)} ${p.unidade}`, 
+            `${(p.dose * res.area).toFixed(2)} ${p.unidade}`, 
+            `${(res.caldaHa > 0 ? (p.dose * res.tanque / res.caldaHa).toFixed(2) : "0.00")} ${p.unidade}`
+        ]);
+
+        doc.autoTable({
+            startY: 55,
+            head: [['Produto', 'Dose/ha', 'Total Geral', 'Dose/Tanque']],
+            body: rows,
+            headStyles: { fillColor: [26, 83, 27] }
+        });
+
+        const obs = document.getElementById('obs').value;
+        if(obs) {
+            doc.text("Observações:", 14, doc.lastAutoTable.finalY + 10);
+            doc.text(obs, 14, doc.lastAutoTable.finalY + 16, { maxWidth: 180 });
+        }
+        doc.save(`Receita_${document.getElementById('fazenda').value}.pdf`);
+    }
+</script>
+</body>
+</html>
+
+            `${(res.caldaHa > 0 ? (p.dose * res.tanque / res.caldaHa).toFixed(2) : "0.00")} ${p.unidade}`
+        ]);
+
+        doc.autoTable({
+            startY: 55,
+            head: [['Produto', 'Dose/ha', 'Total Geral', 'Dose/Tanque']],
+            body: rows,
+            headStyles: { fillColor: [26, 83, 27] }
+        });
+
+        const obs = document.getElementById('obs').value;
+        if(obs) {
+            doc.text("Observações:", 14, doc.lastAutoTable.finalY + 10);
+            doc.text(obs, 14, doc.lastAutoTable.finalY + 16, { maxWidth: 180 });
+        }
+        doc.save(`Receita_${document.getElementById('fazenda').value}.pdf`);
+    }
+</script>
+</body>
+</html>
